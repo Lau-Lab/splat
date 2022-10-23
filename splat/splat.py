@@ -29,7 +29,8 @@ def get_args() -> Args:
     parser.add_argument('-t', '--tmt', type=argparse.FileType('r'), nargs='+',
                           metavar='TMT', help='TMT input file(s)')
 
-    parser.add_argument('-o', '--output', type=argparse.FileType('w'), default='splat_output.txt')
+    parser.add_argument('-o', '--output', type=argparse.FileType('w'), default='splat_output.txt',
+                        metavar='OUTPUT', help='output file path')
 
     parser.add_argument('-v', '--version', action='version',
                         version=f'splat {__version__}')
