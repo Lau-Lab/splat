@@ -41,6 +41,7 @@ def get_args() -> Args:
 
 
 def main() -> None:
+    """ Main entry point for the splat script """
 
     args = get_args()
 

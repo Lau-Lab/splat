@@ -80,7 +80,7 @@ rule pytmt:
     shell:
         "pytmt {input.mzml} {input.pin} -o {wildcards.timepoint}_tmt -m {params.multiplexity} -c {params.contaminants} -n"
 
-rule combine_tmt:
+rule splat:
     input:
         tmt=expand("{timepoint}_tmt/tmt_out.txt", timepoint=config["data"]),
         riana="riana_fit_peptides.csv"
