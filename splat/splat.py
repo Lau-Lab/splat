@@ -2,18 +2,17 @@
 
 """ Main entry point for the splat script """
 
-import os
+import re
 import argparse
+import pandas as pd
 from splat import __version__
 from typing import NamedTuple, List, TextIO
 
-
 class Args(NamedTuple):
     """ Command line arguments. """
-    input_silac: TextIO
-    input_tmt: List[TextIO]
+    silac: TextIO
+    tmt: List[TextIO]
     output: TextIO
-    version: bool
 
 
 def get_args() -> Args:
@@ -24,20 +23,20 @@ def get_args() -> Args:
         epilog='For more information, see GitHub repository at https://github.com/lau-lab/splat',
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument('input_silac', type=argparse.FileType('r'),
+    parser.add_argument('silac', type=argparse.FileType('r'),
                         metavar='SILAC', help='SILAC input file')
 
-    parser.add_argument('input_tmt', type=argparse.FileType('r'), nargs='+',
+    parser.add_argument('-t', '--tmt', type=argparse.FileType('r'), nargs='+',
                           metavar='TMT', help='TMT input file(s)')
 
     parser.add_argument('-o', '--output', type=argparse.FileType('w'), default='splat_output.txt')
 
     parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s {version}'.format(version=__version__))
+                        version=f'splat {__version__}')
 
     args = parser.parse_args()
 
-    return Args(args.input_silac, args.input_tmt, args.output, args.version)
+    return Args(args.silac, args.tmt, args.output)
 
 
 def main() -> None:
@@ -45,7 +44,31 @@ def main() -> None:
 
     args = get_args()
 
-    print(args)
+    # Read in SILAC data
+    silac_df = pd.read_csv(args.silac)
+    silac_df = silac_df.rename(columns={'Unnamed: 0': 'concat',
+                                        'k_deg': 'k',
+                                        'R_squared': 'r2'})
+
+    # Exit if no TMT data
+    if not args.tmt:
+        silac_df.to_csv(args.output, sep='\t', index=False)
+        return None
+
+    # Read in TMT data
+    tmt_df = [pd.read_csv(tmt, sep='\t').assign(timepoint=re.sub('.*(time[0-9]+)_tmt.*$', '\\1', tmt.name)) for tmt in
+              args.tmt]
+    tmt_df = pd.concat(tmt_df)
+
+    # Merge SILAC and TMT data
+    def concat_peps(row):
+        return row['sequence'] + '_' + str(row['charge'])
+
+    tmt_df.insert(0, 'concat', tmt_df.apply(concat_peps, axis=1))
+    tmt_df = tmt_df.merge(silac_df[['concat', 'k', 'r2', 'sd']], how='left')
+
+    # Write output file
+    tmt_df.to_csv(args.output, sep='\t')
 
     return None
 

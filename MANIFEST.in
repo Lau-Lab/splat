@@ -1,0 +1,14 @@
+include pyproject.toml
+
+# Include the README
+include README.md
+
+# Include the workflow
+include workflow/Snakefile
+include config/config.yaml
+
+# Include the license file
+include LICENSE
+
+# Include the data
+recursive-include tests/data *
