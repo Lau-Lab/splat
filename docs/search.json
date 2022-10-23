@@ -1,0 +1,51 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "SPLAT",
+    "section": "",
+    "text": "Edward Lau Lab, University of Colorado School of Medicine"
+  },
+  {
+    "objectID": "index.html#splat",
+    "href": "index.html#splat",
+    "title": "SPLAT",
+    "section": "SPLAT",
+    "text": "SPLAT\nSPLAT (Simultaneous Proteome Localization and Turnover) is a method to simultaneously quantify protein translocation and turnover rates in vivo. This repository provides a workflow to process tandem mass tag (TMT) and stable isotopic labeling by amino acids in cell culture (SILAC) mass spectrometry data generated in SPLAT experiments.\nThe SPLAT workflow is implemented in Snakemake and calls two in-house software packages, RIANA and PyTMT, for processing the SILAC (turnover) and TMT (localization) data, respectively. The workflow is can be run locally on a single machine.\n\n\n\nAn example SPLAT workflow for four turnover time points. Each time point is additionally associated with a spatial proteomics experiment.\n\n\nThe latest version and source code of SPLAT can be found on github: https://github.com/lau-lab/splat.\nSee the Documentation page for instructions."
+  },
+  {
+    "objectID": "index.html#contributors",
+    "href": "index.html#contributors",
+    "title": "SPLAT",
+    "section": "Contributors",
+    "text": "Contributors\n\nEdward Lau, PhD - ed-lau"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "Documentation",
+    "section": "",
+    "text": "The splat-workflow package can be installed via pip and will automatically install the dependencies of splat. After installation, the splat command will be available in your path."
+  },
+  {
+    "objectID": "about.html#dependencies",
+    "href": "about.html#dependencies",
+    "title": "Documentation",
+    "section": "Dependencies",
+    "text": "Dependencies\nInstalling splat-workflow will automatically install the following dependencies:\nriana==0.7.1\npytmt=0.4.1\nIn addition, SPLAT requires the following software to be installed to analyze mass spectrometry files:\nComet\nPercolator"
+  },
+  {
+    "objectID": "about.html#usage",
+    "href": "about.html#usage",
+    "title": "Documentation",
+    "section": "Usage",
+    "text": "Usage\nTo run SPLAT, edit the YAML configuration file inside the config directory, then run Snakemake.\nsnakemake --configfile config/config.yaml -c\nAn example configuration file is provided in the config directory.\n# Config\n\n# Data location. Add as many lines as needed, sample names should be named after\n# labeling time points (e.g., time12 for 12 days/12 hours of experiment)\ndata:\n  time0: /path/to/time0/folder\n  time1: /path/to/time1/folder\n  time3: /path/to/time3/folder\n  time6: /path/to/time6/folder\n\n# Paths to the comet executable, the comet params file, the database, and the percolator executable\n# The Snakefile assumes riana can be executed in the shell by riana\npaths:\n  comet: /path/to/comet_source_2020013/comet.exe\n  comet_params: /path/to/params/comet.params\n  fasta: /path/tp/database.fas\n  percolator: /path/to/percolator\n\n# Integration and fitting parameters\nparams:\n\n  # riana integrate parameters\n  isotopomers: 0,1,2,3,4,5   # isotopomer to integrate (0,1,2,3,4,5 for deuterium; 0,6 for heavy aa)\n  mass_tol: 15         # mass tolerance in ppm for integration (e.g., 25)\n  ria_max: 1          # final precursor ria\n  depth: 1             # minimum number of data points\n  aa: K                 # which amino acid carries heavy label; only relevant if label_type is aa\n  mass_defect: D        # which isotope mass defect to use (D, C13, SILAC)\n\n  # riana fitcurve parameters\n  model: simple     # fitting model (simple, guan, fornasiero)\n  label_type: hw        # labeling type (aa or hw)\n  kp: 10              # guan model parameter (kp) or fornasiero model parameter (b)\n  kr: 0.15              # fornasiero model parameter (a)\n  rp: 5.52              # fornasiero model parameter (r)\n\n  # pytmt parameters\n  multiplexity: 10\n  contaminants: /path/to/contaminants.txt\n\n# Number of threads\nthreads:\n  comet: 8\n  riana: 4\n  fitcurve: 12"
+  },
+  {
+    "objectID": "about.html#all-options",
+    "href": "about.html#all-options",
+    "title": "Documentation",
+    "section": "All options",
+    "text": "All options\npython -m splat -h\nusage: __main__.py [-h] [-t TMT [TMT ...]] [-o OUTPUT] [-v] SILAC\n\nSPLAT: Simultaneous Proteome Localization and Turnover\n\npositional arguments:\n  SILAC                 SILAC input file\n\noptional arguments:\n  -h, --help            show this help message and exit\n  -t TMT [TMT ...], --tmt TMT [TMT ...]\n                        TMT input file(s) (default: None)\n  -o OUTPUT, --output OUTPUT\n                        output file path (default: splat_output.txt)\n  -v, --version         show program's version number and exit\n\nFor more information, see GitHub repository at https://github.com/lau-lab/splat"
+  }
+]

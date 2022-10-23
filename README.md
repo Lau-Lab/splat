@@ -6,7 +6,7 @@ tandem mass tag (TMT) and stable isotopic labeling by amino acids in cell cultur
 spectrometry data generated in SPLAT experiments. The SPLAT method is described in detail in our preprint.
 Please see the Documentations for more information.
 
-# Installation
+## Installation
 
 The `splat-workflow` package can be installed via pip and will automatically install the
 dependencies of splat. After installation, the `splat` command will be available in your path.
@@ -16,8 +16,8 @@ dependencies of splat. After installation, the `splat` command will be available
 
 SPLAT requires the following software to be installed:
 ```
-riana
-pytmt
+riana==0.7.1
+pytmt=0.4.1
 ```
 
 ## Contributing
