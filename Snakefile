@@ -1,0 +1,90 @@
+"""
+Snakefile for multiple fractions
+
+Example command:
+snakemake -c -s ./Snakefile -d out/snakemake_test --configfile config_template.yaml
+
+"""
+
+rule all:
+    input: "combined_silac_tmt.txt"
+
+rule comet:
+    input: mzml = lambda wildcards: config["data"][wildcards.timepoint]
+    output:
+        psms="{timepoint}/percolator/percolator.target.psms.txt"
+    log: "{timepoint}/comet.log"
+    threads: config["threads"]["comet"]
+    benchmark: "{timepoint}/comet.benchmark.txt"
+    params:
+        comet=config["paths"]["comet"],
+        percolator=config["paths"]["percolator"],
+        comet_params=config["paths"]["comet_params"],
+        fasta=config["paths"]["fasta"]
+    shell: #
+        """
+        {params.comet} -P{params.comet_params} -D{params.fasta} {input}/*.mzML.gz 1>> {log}
+        {params.percolator} --protein T {input}/*.pep.xml --decoy-prefix DECOY_ \\
+         --overwrite T --output-dir {wildcards.timepoint}/percolator \\
+         --spectral-counting-fdr 0.01 --maxiter 15 1>> {log} 2>>{log}
+        """
+
+
+rule riana_integrate:
+    input:
+        pin="{timepoint}/percolator/percolator.target.psms.txt",
+        mzml= lambda wildcards: config["data"][wildcards.timepoint]
+    output:
+        riana="{timepoint}_riana.txt"
+    params:
+        iso=config["params"]["isotopomers"],
+        mass_tol=config["params"]["mass_tol"],
+        mass_defect=config["params"]["mass_defect"]
+    threads: config["threads"]["riana"]
+    shell:
+        "riana integrate {input.mzml} "
+        "{input.pin} -D {params.mass_defect} "
+        "-i {params.iso} -q 0.01 -r 0.33 -m {params.mass_tol} -o {output} -s {wildcards.timepoint} "
+        "-t {threads}"
+
+rule riana_fit:
+    input:
+        integrated=expand("{timepoint}_riana.txt", timepoint=config["data"])
+    output:
+        riana="riana_fit_peptides.csv"
+    params:
+        ria=config["params"]["ria_max"],
+        kp=config["params"]["kp"],
+        kr=config["params"]["kr"],
+        rp=config["params"]["rp"],
+        aa=config["params"]["aa"],
+        depth=config["params"]["depth"],
+        label_type=config["params"]["label_type"],
+        model=config["params"]["model"]
+    threads: config["threads"]["fitcurve"]
+    shell:
+        "riana fit {input.integrated} "
+        "-q 0.01 -d {params.depth} -o . -m {params.model} --kp {params.kp} "
+        "--aa {params.aa} --kr {params.kr} --rp {params.rp} "
+        "-t {threads} -r {params.ria} -l {params.label_type}"
+
+rule pytmt:
+    input:
+        mzml = lambda wildcards: config["data"][wildcards.timepoint],
+        pin = "{timepoint}/percolator/percolator.target.psms.txt"
+    output:
+        tmt="{timepoint}_tmt/tmt_out.txt"
+    params:
+        multiplexity = config["params"]["multiplexity"],
+        contaminants = config["params"]["contaminants"]
+    shell:
+        "pytmt {input.mzml} {input.pin} -o {wildcards.timepoint}_tmt -m {params.multiplexity} -c {params.contaminants} -n"
+
+rule combine_tmt:
+    input:
+        tmt=expand("{timepoint}_tmt/tmt_out.txt", timepoint=config["data"]),
+        riana="riana_fit_peptides.csv"
+    output:
+        combined_tmt="combined_silac_tmt.txt"
+    shell:
+        "cat {input.tmt} > {output.combined_tmt}"
