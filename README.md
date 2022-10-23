@@ -4,7 +4,7 @@ SPLAT (Simultaneous Proteome Localization and Turnover)  is a method to simultan
 protein translocation and turnover rates in vivo. This repository provides a workflow to process
 tandem mass tag (TMT) and stable isotopic labeling by amino acids in cell culture (SILAC) mass
 spectrometry data generated in SPLAT experiments. The SPLAT method is described in detail in our preprint.
-Please see the Documentations for more information.
+Please see the [Documentation](https://lau-lab.github.io/splat) page for more information.
 
 ## Installation
 
