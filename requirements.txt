@@ -1,0 +1,3 @@
+riana==0.7.1
+pytmt==0.4.1
+snakemake>=7.0.0
