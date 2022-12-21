@@ -20,7 +20,7 @@ paths:
 params:
 
   # riana integrate parameters
-  isotopomers: 0 8 10 18 20   # isotopomer to integrate (0,1,2,3,4,5 for deuterium; 0,6 for heavy aa)
+  isotopomers: 0 8 10 16 18 20   # isotopomer to integrate (0e.g., 0 8 for heavy lysine)
   mass_tol: 15         # mass tolerance in ppm for integration (e.g., 25)
   ria_max: 1          # final precursor ria
   depth: 1             # minimum number of data points
